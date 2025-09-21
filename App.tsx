@@ -1,17 +1,11 @@
 import React, { useMemo, useState } from "react";
-
-import {
-  View,
-  Text,
-  FlatList,
-  TouchableOpacity,
-  StyleSheet,
-  Image,
-  SafeAreaView,
-  Alert,
-} from "react-native";
+import { View, Text, FlatList, TouchableOpacity, StyleSheet, SafeAreaView, Alert } from "react-native";
+import { Image } from "expo-image";
 import { NavigationContainer, DefaultTheme } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
+
+const BLUR_PLACEHOLDER =
+  "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR4nGNgYAAAAAMAASsJTYQAAAAASUVORK5CYII=";
 
 /* ================== Types ================== */
 type Drop = {
@@ -40,52 +34,45 @@ const MOCK_DROPS: Drop[] = [
     id: "aa1",
     restaurantName: "Maize & Blue Deli",
     title: "Surprise Bag (Sandwiches & Sides)",
-    // nicer deli shot
-    imageUrl:
-       "https://images.unsplash.com/photo-1606756790138-261d2b21cd34?q=80&w=1600&auto=format&fit=crop",
+    imageUrl: "https://images.unsplash.com/photo-1606756790138-261d2b21cd34?q=80&w=1600&auto=format&fit=crop",
     priceCents: 799,
     qtyRemaining: 5,
     pickupStartISO: new Date(now + 30 * 60 * 1000).toISOString(),
     pickupEndISO: new Date(now + 120 * 60 * 1000).toISOString(),
     dietary: ["veg"],
-    distanceMi: 1.2,
+    distanceMi: 1.2
   },
   {
     id: "bb2",
     restaurantName: "Fleetwood Diner",
     title: "Closing Time Combo",
-    imageUrl:
-       "https://images.unsplash.com/photo-1550547660-d9450f859349?q=80&w=1600&auto=format&fit=crop",
-      
+    imageUrl: "https://images.unsplash.com/photo-1550547660-d9450f859349?q=80&w=1600&auto=format&fit=crop",
     priceCents: 599,
     qtyRemaining: 2,
     pickupStartISO: new Date(now + 60 * 60 * 1000).toISOString(),
     pickupEndISO: new Date(now + 150 * 60 * 1000).toISOString(),
     dietary: [],
-    distanceMi: 2.3,
+    distanceMi: 2.3
   },
   {
     id: "cc3",
     restaurantName: "Seva Ann Arbor",
     title: "Veggie Entrees Mix",
-    imageUrl:
-      "https://images.unsplash.com/photo-1504674900247-0877df9cc836?q=80&w=1600&auto=format&fit=crop",
+    imageUrl: "https://images.unsplash.com/photo-1504674900247-0877df9cc836?q=80&w=1600&auto=format&fit=crop",
     priceCents: 899,
     qtyRemaining: 8,
     pickupStartISO: new Date(now + 20 * 60 * 1000).toISOString(),
     pickupEndISO: new Date(now + 90 * 60 * 1000).toISOString(),
     dietary: ["veg", "gluten-free"],
-    distanceMi: 0.8,
-  },
+    distanceMi: 0.8
+  }
 ];
 
 /* ================== Helpers ================== */
 const dollars = (cents: number) => `$${(cents / 100).toFixed(2)}`;
 const timeRange = (startISO: string, endISO: string) => {
-  const f = (d: Date) =>
-    d.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
-  const s = new Date(startISO);
-  const e = new Date(endISO);
+  const f = (d: Date) => d.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
+  const s = new Date(startISO), e = new Date(endISO);
   return `${f(s)}–${f(e)}`;
 };
 
@@ -98,8 +85,7 @@ const HomeScreen = ({ navigation }: any) => {
       [...drops].sort(
         (a, b) =>
           a.distanceMi - b.distanceMi ||
-          new Date(a.pickupStartISO).getTime() -
-            new Date(b.pickupStartISO).getTime()
+          new Date(a.pickupStartISO).getTime() - new Date(b.pickupStartISO).getTime()
       ),
     [drops]
   );
@@ -120,24 +106,25 @@ const HomeScreen = ({ navigation }: any) => {
             onPress={() => navigation.navigate("DropDetail", { drop: item })}
             activeOpacity={0.85}
           >
-            <Image source={{ uri: item.imageUrl }} style={styles.image} />
+            <Image
+              source={{ uri: item.imageUrl }}
+              style={styles.image}
+              contentFit="cover"
+              transition={300}
+              placeholder={BLUR_PLACEHOLDER}
+            />
             <View style={styles.cardBody}>
-              <Text style={styles.title} numberOfLines={1}>
-                {item.title}
-              </Text>
+              <Text style={styles.title} numberOfLines={1}>{item.title}</Text>
               <Text style={styles.restaurant} numberOfLines={1}>
                 {item.restaurantName} • {item.distanceMi.toFixed(1)} mi
               </Text>
               <View style={styles.rowBetween}>
                 <Text style={styles.price}>{dollars(item.priceCents)}</Text>
                 <Text style={styles.badge}>
-                  {item.qtyRemaining} left ·{" "}
-                  {timeRange(item.pickupStartISO, item.pickupEndISO)}
+                  {item.qtyRemaining} left · {timeRange(item.pickupStartISO, item.pickupEndISO)}
                 </Text>
               </View>
-              {item.dietary.length > 0 && (
-                <Text style={styles.tags}>{item.dietary.join(" • ")}</Text>
-              )}
+              {item.dietary.length > 0 && <Text style={styles.tags}>{item.dietary.join(" • ")}</Text>}
             </View>
           </TouchableOpacity>
         )}
@@ -146,59 +133,39 @@ const HomeScreen = ({ navigation }: any) => {
   );
 };
 
-const DIETARY_OPTIONS = [
-  "Vegetarian",
-  "Vegan",
-  "Gluten-free",
-  "Dairy-free",
-  "Nut-free",
-  "Halal",
-  "Kosher",
-];
+const DIETARY_OPTIONS = ["Vegetarian", "Vegan", "Gluten-free", "Dairy-free", "Nut-free", "Halal", "Kosher"];
 
 const DropDetailScreen = ({ route, navigation }: any) => {
   const { drop } = route.params as { drop: Drop };
-
-  // dropdown state for dietary preferences
   const [prefsOpen, setPrefsOpen] = useState(false);
-  const [selectedPrefs, setSelectedPrefs] = useState<Record<string, boolean>>(
-    {}
-  );
+  const [selectedPrefs, setSelectedPrefs] = useState<Record<string, boolean>>({});
 
-  const togglePref = (name: string) =>
-    setSelectedPrefs((p) => ({ ...p, [name]: !p[name] }));
+  const togglePref = (name: string) => setSelectedPrefs((p) => ({ ...p, [name]: !p[name] }));
 
   const checkout = () => {
     const fakeOrderId = `ORD-${drop.id}-${Math.floor(Math.random() * 1e6)}`;
     Alert.alert("Payment (Test Mode)", "Simulating a successful payment…", [
-      {
-        text: "OK",
-        onPress: () =>
-          navigation.replace("OrderQR", { orderId: fakeOrderId, drop }),
-      },
+      { text: "OK", onPress: () => navigation.replace("OrderQR", { orderId: fakeOrderId, drop }) }
     ]);
   };
 
-  const selectedList = Object.entries(selectedPrefs)
-    .filter(([_, v]) => v)
-    .map(([k]) => k);
+  const selectedList = Object.entries(selectedPrefs).filter(([_, v]) => v).map(([k]) => k);
 
   return (
     <SafeAreaView style={styles.safe}>
-      <Image source={{ uri: drop.imageUrl }} style={styles.detailImage} />
+      <Image
+        source={{ uri: drop.imageUrl }}
+        style={styles.detailImage}
+        contentFit="cover"
+        transition={300}
+        placeholder={BLUR_PLACEHOLDER}
+      />
       <View style={styles.detailBody}>
         <Text style={styles.detailTitle}>{drop.title}</Text>
 
-        {/* Tap restaurant name to open dropdown */}
-        <TouchableOpacity
-          onPress={() => setPrefsOpen((o) => !o)}
-          activeOpacity={0.7}
-        >
+        <TouchableOpacity onPress={() => setPrefsOpen((o) => !o)} activeOpacity={0.7}>
           <Text style={styles.detailRestaurant}>
-            {drop.restaurantName}{" "}
-            <Text style={styles.linkish}>
-              {prefsOpen ? "▲" : "▼"} dietary preferences
-            </Text>
+            {drop.restaurantName} <Text style={styles.linkish}>{prefsOpen ? "▲" : "▼"} dietary preferences</Text>
           </Text>
         </TouchableOpacity>
 
@@ -207,36 +174,19 @@ const DropDetailScreen = ({ route, navigation }: any) => {
             {DIETARY_OPTIONS.map((opt) => {
               const on = !!selectedPrefs[opt];
               return (
-                <TouchableOpacity
-                  key={opt}
-                  style={styles.optRow}
-                  onPress={() => togglePref(opt)}
-                  activeOpacity={0.8}
-                >
-                  <View style={[styles.checkbox, on && styles.checkboxOn]}>
-                    {on && <Text style={styles.checkboxMark}>✓</Text>}
-                  </View>
+                <TouchableOpacity key={opt} style={styles.optRow} onPress={() => togglePref(opt)} activeOpacity={0.8}>
+                  <View style={[styles.checkbox, on && styles.checkboxOn]}>{on && <Text style={styles.checkboxMark}>✓</Text>}</View>
                   <Text style={styles.optText}>{opt}</Text>
                 </TouchableOpacity>
               );
             })}
-            {selectedList.length > 0 && (
-              <Text style={styles.selectedNote}>
-                Selected: {selectedList.join(", ")}
-              </Text>
-            )}
+            {selectedList.length > 0 && <Text style={styles.selectedNote}>Selected: {selectedList.join(", ")}</Text>}
           </View>
         )}
 
-        <Text style={styles.detailMeta}>
-          {dollars(drop.priceCents)} · {drop.distanceMi.toFixed(1)} mi away
-        </Text>
-        <Text style={styles.detailMeta}>
-          Pickup: {timeRange(drop.pickupStartISO, drop.pickupEndISO)}
-        </Text>
-        {drop.dietary.length > 0 && (
-          <Text style={styles.tags}>{drop.dietary.join(" • ")}</Text>
-        )}
+        <Text style={styles.detailMeta}>{dollars(drop.priceCents)} · {drop.distanceMi.toFixed(1)} mi away</Text>
+        <Text style={styles.detailMeta}>Pickup: {timeRange(drop.pickupStartISO, drop.pickupEndISO)}</Text>
+        {drop.dietary.length > 0 && <Text style={styles.tags}>{drop.dietary.join(" • ")}</Text>}
 
         <TouchableOpacity
           style={[styles.cta, drop.qtyRemaining <= 0 && styles.ctaDisabled]}
@@ -244,11 +194,7 @@ const DropDetailScreen = ({ route, navigation }: any) => {
           onPress={checkout}
           activeOpacity={0.9}
         >
-          <Text style={styles.ctaText}>
-            {drop.qtyRemaining > 0
-              ? `Checkout — ${dollars(drop.priceCents)}`
-              : "Sold Out"}
-          </Text>
+          <Text style={styles.ctaText}>{drop.qtyRemaining > 0 ? `Checkout — ${dollars(drop.priceCents)}` : "Sold Out"}</Text>
         </TouchableOpacity>
       </View>
     </SafeAreaView>
@@ -257,25 +203,16 @@ const DropDetailScreen = ({ route, navigation }: any) => {
 
 const OrderQRScreen = ({ route, navigation }: any) => {
   const { orderId, drop } = route.params as { orderId: string; drop: Drop };
-  const pseudoQR = orderId
-    .replace(/[^A-Z0-9]/g, "")
-    .split("")
-    .map((c, i) => ((c.charCodeAt(0) + i) % 2 ? "██" : "  "))
-    .join("");
+  const pseudoQR = orderId.replace(/[^A-Z0-9]/g, "").split("").map((c, i) => ((c.charCodeAt(0) + i) % 2 ? "██" : "  ")).join("");
 
   return (
     <SafeAreaView style={styles.safe}>
       <View style={styles.qrCard}>
         <Text style={styles.qrTitle}>Pickup QR</Text>
-        <View style={styles.qrBox}>
-          <Text style={styles.qrMono}>{pseudoQR}</Text>
-        </View>
+        <View style={styles.qrBox}><Text style={styles.qrMono}>{pseudoQR}</Text></View>
         <Text style={styles.qrHint}>Show this code at {drop.restaurantName}</Text>
         <Text style={styles.detailMeta}>Order ID: {orderId}</Text>
-        <TouchableOpacity
-          style={styles.secondary}
-          onPress={() => navigation.popToTop()}
-        >
+        <TouchableOpacity style={styles.secondary} onPress={() => navigation.popToTop()}>
           <Text style={styles.secondaryText}>Back to Home</Text>
         </TouchableOpacity>
       </View>
@@ -285,11 +222,7 @@ const OrderQRScreen = ({ route, navigation }: any) => {
 
 /* ================== Navigation ================== */
 const Stack = createNativeStackNavigator<RootStackParamList>();
-
-const navTheme = {
-  ...DefaultTheme,
-  colors: { ...DefaultTheme.colors, background: "#0e0f12" },
-};
+const navTheme = { ...DefaultTheme, colors: { ...DefaultTheme.colors, background: "#0e0f12" } };
 
 export default function App() {
   return (
@@ -298,7 +231,7 @@ export default function App() {
         screenOptions={{
           headerStyle: { backgroundColor: "#0e0f12" },
           headerTintColor: "#fff",
-          contentStyle: { backgroundColor: "#0e0f12" },
+          contentStyle: { backgroundColor: "#0e0f12" }
         }}
       >
         <Stack.Screen name="Home" component={HomeScreen} options={{ title: "Dish Dash" }} />
@@ -323,9 +256,9 @@ const styles = StyleSheet.create({
     overflow: "hidden",
     marginBottom: 16,
     borderWidth: StyleSheet.hairlineWidth,
-    borderColor: "#232733",
+    borderColor: "#232733"
   },
-  image: { width: "100%", height: 160 },
+  image: { width: "100%", height: 160, backgroundColor: "#222" },
   cardBody: { padding: 12, gap: 6 },
   title: { color: "#fff", fontSize: 18, fontWeight: "600" },
   restaurant: { color: "#a0a4ad" },
@@ -334,7 +267,7 @@ const styles = StyleSheet.create({
   badge: { color: "#a0a4ad", fontSize: 12 },
   tags: { color: "#86e3ff", marginTop: 2 },
 
-  detailImage: { width: "100%", height: 240 },
+  detailImage: { width: "100%", height: 240, backgroundColor: "#222" },
   detailBody: { padding: 16, gap: 8 },
   detailTitle: { color: "#fff", fontSize: 24, fontWeight: "700" },
   detailRestaurant: { color: "#cbd0d8", fontSize: 16 },
@@ -348,7 +281,7 @@ const styles = StyleSheet.create({
     borderWidth: StyleSheet.hairlineWidth,
     borderColor: "#2a2f38",
     padding: 10,
-    gap: 8,
+    gap: 8
   },
   optRow: { flexDirection: "row", alignItems: "center", gap: 10, paddingVertical: 6 },
   checkbox: {
@@ -359,20 +292,14 @@ const styles = StyleSheet.create({
     borderColor: "#3b4252",
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "transparent",
+    backgroundColor: "transparent"
   },
   checkboxOn: { backgroundColor: "#00d47e", borderColor: "#00d47e" },
   checkboxMark: { color: "#0b0d10", fontWeight: "800" },
   optText: { color: "#e5e9f0", fontSize: 15 },
   selectedNote: { color: "#a0a4ad", fontSize: 12, marginTop: 4 },
 
-  cta: {
-    marginTop: 16,
-    backgroundColor: "#00d47e",
-    paddingVertical: 14,
-    borderRadius: 12,
-    alignItems: "center",
-  },
+  cta: { marginTop: 16, backgroundColor: "#00d47e", paddingVertical: 14, borderRadius: 12, alignItems: "center" },
   ctaDisabled: { backgroundColor: "#2a2f38" },
   ctaText: { color: "#0b0d10", fontWeight: "800", fontSize: 16 },
 
@@ -387,24 +314,10 @@ const styles = StyleSheet.create({
     borderColor: "#232733",
     alignItems: "center",
     justifyContent: "center",
-    padding: 16,
+    padding: 16
   },
   qrMono: { color: "#fff", fontFamily: "Courier", letterSpacing: 1 },
   qrHint: { color: "#cbd0d8" },
-  secondary: {
-    marginTop: 8,
-    paddingVertical: 12,
-    paddingHorizontal: 18,
-    borderRadius: 10,
-    borderColor: "#2f3542",
-    borderWidth: 1,
-  },
-  secondaryText: { color: "#cbd0d8", fontWeight: "600" },
+  secondary: { marginTop: 8, paddingVertical: 12, paddingHorizontal: 18, borderRadius: 10, borderColor: "#2f3542", borderWidth: 1 },
+  secondaryText: { color: "#cbd0d8", fontWeight: "600" }
 });
-
-
-
-
-//MAIZE AND BLUE :       "https://images.unsplash.com/photo-1606756790138-261d2b21cd34?q=80&w=1600&auto=format&fit=crop",
-// FLEETWOOD:       "https://images.unsplash.com/photo-1550547660-d9450f859349?q=80&w=1600&auto=format&fit=crop",
-//SEVA :       "https://images.unsplash.com/photo-1504674900247-0877df9cc836?q=80&w=1600&auto=format&fit=crop",
