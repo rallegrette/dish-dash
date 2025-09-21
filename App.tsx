@@ -56,7 +56,7 @@ const MOCK_DROPS: Drop[] = [
   },
   {
     id: "cc3",
-    restaurantName: "Seva Ann Arbor",
+    restaurantName: "Savas",
     title: "Veggie Entrees Mix",
     imageUrl: "https://images.unsplash.com/photo-1504674900247-0877df9cc836?q=80&w=1600&auto=format&fit=crop",
     priceCents: 899,
