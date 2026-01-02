@@ -2,6 +2,9 @@
 
 **Dish Dash** is a web application that connects restaurants and cafes with surplus food to customers seeking discounted meals. The platform reduces food waste while providing affordable dining options.
 
+<img width="375" height="348" alt="Screenshot 2026-01-02 at 10 26 33 AM" src="https://github.com/user-attachments/assets/7edab65b-0ffd-4979-9f52-cd2bcf1d6e71" />
+
+
 ---
 
 ## Features
